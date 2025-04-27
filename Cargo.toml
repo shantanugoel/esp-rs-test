@@ -2,7 +2,7 @@
 name = "hello-world-rs"
 version = "0.1.0"
 authors = ["Shantanu Goel <shantanu.goel@gmail.com>"]
-edition = "2024"
+edition = "2021"
 resolver = "2"
 
 [[bin]]
