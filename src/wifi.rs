@@ -5,15 +5,17 @@ use esp_idf_svc::{
     wifi::{ClientConfiguration, Configuration::Client, EspWifi},
 };
 
+use std::{thread::sleep, time::Duration};
+
 #[toml_cfg::toml_config]
 struct WifiConfig {
     #[default("")]
-    ssid: &'static str,
+    wifi_ssid: &'static str,
     #[default("")]
-    password: &'static str,
+    wifi_password: &'static str,
 }
 
-pub fn connect() {
+pub fn connect() -> EspWifi<'static> {
     log::info!("Connecting to wifi...");
 
     let event_loop = EspSystemEventLoop::take().unwrap();
@@ -23,8 +25,8 @@ pub fn connect() {
     let mut wifi_driver = EspWifi::new(peripherals.modem, event_loop, Some(nvs)).unwrap();
 
     let client_config = ClientConfiguration {
-        ssid: WIFI_CONFIG.ssid.try_into().unwrap(),
-        password: WIFI_CONFIG.password.try_into().unwrap(),
+        ssid: WIFI_CONFIG.wifi_ssid.try_into().unwrap(),
+        password: WIFI_CONFIG.wifi_password.try_into().unwrap(),
         ..Default::default()
     };
 
@@ -37,12 +39,18 @@ pub fn connect() {
     wifi_driver.connect().unwrap();
 
     while !wifi_driver.is_connected().unwrap() {
-        let config = wifi_driver.get_configuration().unwrap();
-        log::info!("Waiting for wifi to connect... {:?}", config);
+        log::info!(
+            "Waiting for wifi to connect... {} {}",
+            WIFI_CONFIG.wifi_ssid,
+            WIFI_CONFIG.wifi_password
+        );
+        sleep(Duration::from_secs(1));
     }
 
-    println!(
+    log::info!(
         "Connected to wifi. IP: {:?}",
         wifi_driver.sta_netif().get_ip_info().unwrap()
     );
+
+    wifi_driver
 }

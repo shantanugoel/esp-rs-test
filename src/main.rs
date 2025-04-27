@@ -11,7 +11,7 @@ fn main() {
 
     log::info!("Hello, world!");
 
-    wifi::connect();
+    let wifi = wifi::connect();
 
     loop {
         sleep(Duration::from_secs(1));
