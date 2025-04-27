@@ -1,1 +1,1 @@
-`cargo espflash flash --monitor`
+`cargo espflash flash --monitor --partition-table .\partition-table.csv`
