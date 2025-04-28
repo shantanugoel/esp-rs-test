@@ -1,20 +1,20 @@
 import { AboutSlint, VerticalBox, Button, ProgressIndicator } from "std-widgets.slint";
 
 export component MainWindow inherits Window {
-    property <int> counter: 0;
+    in-out property <string> fact: "";
+    callback update-fact();
     VerticalBox {
         Text {
-            text: "Hello World! " + counter;
-        }
-
-        AboutSlint {
-            preferred-height: 150px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            text: fact;
+            wrap: word-wrap;
         }
 
         Button {
-            text: "Click me!";
+            text: "Click me to see next fact!";
             clicked => {
-                counter = counter + 1;
+                root.update-fact();
             }
         }
 

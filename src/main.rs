@@ -1,9 +1,11 @@
 use std::{thread::sleep, time::Duration};
 use esp_idf_svc::hal::prelude::*;
+use slint::ToSharedString;
+use serde_json::Value;
 
 mod wifi;
 mod slint_platform;
-
+mod http;
 
 slint::include_modules!();
 
@@ -32,17 +34,34 @@ fn main() {
     let mut timer =
         esp_idf_svc::hal::timer::TimerDriver::new(p.timer00, &Default::default()).unwrap();
 
+    let window = MainWindow::new().unwrap();
+
+    let window_handle = window.as_weak();
+    let mut client = http::get_http_client();
+
+    window.on_update_fact(move || {
+        log::info!("Updating fact!!");
+        let window = window_handle.upgrade().unwrap();
+        window.set_fact("Hello World!!".to_shared_string());
+        let body = http::get(&mut client, "https://api.chucknorris.io/jokes/random");
+        log::info!("Body: {}", body);
+        let v: Value = serde_json::from_str(&body).unwrap();
+        window.set_fact(v["value"].to_string().to_shared_string());
+    });
+
+    let wifi = wifi::connect(p.modem);
+    log::info!("Wifi connected!!: {:?}", wifi.sta_netif().get_ip_info());
+
+    window.run().unwrap();
+
+
     slint::spawn_local(async move {
         for _ in 0..5 {
             timer.delay(5 * timer.tick_hz()).await.unwrap();
-            eprintln!("hello from future");
+            log::info!("Waiting!!");
         }
     })
     .unwrap();
-
-    MainWindow::new().unwrap().run().unwrap();
-
-    let wifi = wifi::connect();
 
     loop {
         sleep(Duration::from_secs(1));

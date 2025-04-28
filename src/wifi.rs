@@ -1,6 +1,6 @@
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
-    hal::peripherals::Peripherals,
+    hal::modem::Modem,
     nvs::EspDefaultNvsPartition,
     wifi::{ClientConfiguration, Configuration::Client, EspWifi},
 };
@@ -15,14 +15,14 @@ struct WifiConfig {
     wifi_password: &'static str,
 }
 
-pub fn connect() -> EspWifi<'static> {
+pub fn connect(modem: Modem) -> EspWifi<'static> {
     log::info!("Connecting to wifi...");
 
     let event_loop = EspSystemEventLoop::take().unwrap();
     let nvs = EspDefaultNvsPartition::take().unwrap();
-    let peripherals = Peripherals::take().unwrap();
+    // let peripherals = Peripherals::take().unwrap();
 
-    let mut wifi_driver = EspWifi::new(peripherals.modem, event_loop, Some(nvs)).unwrap();
+    let mut wifi_driver = EspWifi::new(modem, event_loop, Some(nvs)).unwrap();
 
     let client_config = ClientConfiguration {
         ssid: WIFI_CONFIG.wifi_ssid.try_into().unwrap(),
